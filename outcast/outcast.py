@@ -8,7 +8,7 @@ from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.log import lg, output
 from mininet.node import CPULimitedHost
-from mininet.node import OVSController
+from mininet.node import Controller
 from mininet.link import TCLink
 from mininet.util import irange, custom, quietRun, dumpNetConnections
 from mininet.cli import CLI
@@ -206,7 +206,7 @@ def main():
     link = custom(TCLink, bw=args.bw, delay='1ms',
                   max_queue_size=200)
 
-    net = Mininet(topo=topo, host=host, link=link, controller=OVSController)
+    net = Mininet(topo=topo, link=link)
 
     net.start()
 
