@@ -8,6 +8,7 @@ from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.log import lg, output
 from mininet.node import CPULimitedHost
+from mininet.node import OVSController
 from mininet.link import TCLink
 from mininet.util import irange, custom, quietRun, dumpNetConnections
 from mininet.cli import CLI
@@ -73,42 +74,33 @@ lg.setLogLevel('info')
 # Topology to be instantiated in Mininet
 class OutcastTopo(Topo):
     "Parking Lot Topology"
-
-    def __init__(self, n=1, cpu=.1, bw=10, delay=None,
-                 max_queue_size=None, **params):
+    def __init__(self, n=1, cpu=.1, bw=10, delay=None,max_queue_size=None, **params):
         """Outcast topology with one receiver
-           and n clients.
-           n: number of clients
-           cpu: system fraction for each host
-           bw: link bandwidth in Mb/s
-           delay: link delay (e.g. 10ms)"""
-
+        and n clients.
+        n: number of clients
+        cpu: system fraction for each host
+        bw: link bandwidth in Mb/s
+        delay: link delay (e.g. 10ms)"""
         # Initialize topo
         Topo.__init__(self, **params)
-
         # Host and link configuration
         hconfig = {'cpu': cpu}
-        lconfig = {'bw': bw, 'delay': delay,
-                   'max_queue_size': max_queue_size }
-
+        lconfig = {'bw': bw, 'delay': delay,'max_queue_size': max_queue_size }
         # Create the actual topology
-        receiver = self.add_host('receiver')
-
+        receiver = self.addHost('receiver')
         # Switch ports 1:uplink 2:hostlink 3:downlink
         h0Switch, aggrSwitchPort, switchRec = 1, 2, 3
+        #small sender
+        h0 = self.addHost('h0', **hconfig)
+        s1 = self.addSwitch('s1')
+        aggrSwitch = self.addSwitch('s2')
+        for i in range(1, n+1):
+            h = self.addHost('h'+str(i), **hconfig)
+            self.addLink(h, aggrSwitch, port1=0, port2=i, **lconfig)    
 	
-	#small sender
-    h0 = self.add_host('h0', **hconfig)
-    s1 = self.add_switch('s1')
-    aggrSwitch = self.add_switch('s2')
-    
-    for i in range(1, n+1):
-        h = self.add_host('h'+str(i), **hconfig)
-        self.add_link(h, aggrSwitch, port1=0, port2=i, **lconfig)    
-	
-    self.add_link(h0, s1, port1=0, port2=h0Switch, **lconfig)
-    self.add_link(aggrSwitch, s1, port1=0, port2=aggrSwitchPort, **lconfig)
-    self.add_link(s1, receiver, port1=switchRec, port2=0, **lconfig)
+        self.addLink(h0, s1, port1=0, port2=h0Switch, **lconfig)
+        self.addLink(aggrSwitch, s1, port1=0, port2=aggrSwitchPort, **lconfig)
+        self.addLink(s1, receiver, port1=switchRec, port2=0, **lconfig)
 
         # Uncomment the next 8 lines to create a N = 3 parking lot topology
         #s2 = self.add_switch('s2')
@@ -214,7 +206,7 @@ def main():
     link = custom(TCLink, bw=args.bw, delay='1ms',
                   max_queue_size=200)
 
-    net = Mininet(topo=topo, host=host, link=link)
+    net = Mininet(topo=topo, host=host, link=link, controller=OVSController)
 
     net.start()
 
