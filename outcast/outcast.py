@@ -96,11 +96,13 @@ class OutcastTopo(Topo):
         aggrSwitch = self.addSwitch('s2')
         for i in range(1, n+1):
             h = self.addHost('h'+str(i), **hconfig)
-            self.addLink(h, aggrSwitch, port1=0, port2=i, **lconfig)    
+            self.addLink(h, aggrSwitch, port1=0, port2=i+1, **lconfig)    
 	
         self.addLink(h0, s1, port1=0, port2=h0Switch, **lconfig)
-        self.addLink(aggrSwitch, s1, port1=0, port2=aggrSwitchPort, **lconfig)
-        self.addLink(s1, receiver, port1=switchRec, port2=0, **lconfig)
+        self.addLink(aggrSwitch, s1, port1=1, port2=aggrSwitchPort, **lconfig)
+        #self.addLink(s1, receiver, port1=switchRec, port2=0, **lconfig)
+        self.addLink(receiver, s1, port1=0, port2=switchRec, **lconfig)
+
 
         # Uncomment the next 8 lines to create a N = 3 parking lot topology
         #s2 = self.add_switch('s2')
@@ -153,7 +155,7 @@ def run_outcast_expt(net, n):
     monitor = Process(target=monitor_devs_ng, 
             args=('%s/bwm.txt' % args.dir, 1.0))
     monitor.start()
-    start_tcpprobe()
+    # start_tcpprobe()
 
     # Get receiver and clients
     recvr = net.getNodeByName('receiver')
@@ -185,7 +187,7 @@ def run_outcast_expt(net, n):
 
     # Shut down monitors
     monitor.terminate()
-    stop_tcpprobe()
+    #stop_tcpprobe()
 
 def check_prereqs():
     "Check for necessary programs"
