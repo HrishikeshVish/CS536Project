@@ -87,7 +87,7 @@ parser.add_argument('--normalize',
                     dest="normalise")
 
 args = parser.parse_args()
-print args
+print(args)
 if args.labels is None:
     args.labels = args.files
 
@@ -142,7 +142,7 @@ for f in args.files:
     if args.summarise:
         for k in rate.keys():
             if pat_iface.match(k):
-                print k
+                print(k)
                 vals = filter(lambda e: e < 1500, rate[k][10:-10])
                 if args.normalise:
                     vals = map(lambda e: e / bw[idx], vals)
@@ -151,7 +151,7 @@ for f in args.files:
     else:
         for k in sorted(rate.keys()):
             if pat_iface.match(k):
-                print k
+                print(k)
                 plt.fill(offset_data(rate[k]), label=k, zorder=-1 * offset)
                 offset += offset_diff
 

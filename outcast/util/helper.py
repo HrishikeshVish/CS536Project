@@ -15,7 +15,7 @@ import argparse
 import math
 
 def read_list(fname, delim=','):
-    lines = open(fname).xreadlines()
+    lines = open(fname).readlines()
     ret = []
     for l in lines:
         ls = l.strip().split(delim)
@@ -52,10 +52,10 @@ def col(n, obj = None, clean = lambda e: e):
         try:
             return clean(obj[n])
         except:
-            print T.colored('col(...): column "%s" not found!' % (n), 'red')
+            print(T.colored('col(...): column "%s" not found!' % (n), 'red'))
             return None
     # We wouldn't know what to do here, so just return None
-    print T.colored('col(...): column "%s" not found!' % (n), 'red')
+    print(T.colored('col(...): column "%s" not found!' % (n), 'red'))
     return None
 
 def transpose(l):
@@ -71,7 +71,7 @@ def stdev(lst):
 
 def xaxis(values, limit):
     l = len(values)
-    return zip(*map(lambda (x,y): (x*1.0*limit/l, y), enumerate(values)))
+    return zip(*map(lambda x,y: (x*1.0*limit/l, y), enumerate(values)))
 
 def grouper(n, iterable, fillvalue=None):
     "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"

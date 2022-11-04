@@ -96,7 +96,7 @@ if args.histogram:
     axHist.set_title("Histogram of sum(cwnd_i)")
 
 if args.out:
-    print 'saving to', args.out
+    print('saving to', args.out)
     plt.savefig(args.out)
 else:
     plt.show()

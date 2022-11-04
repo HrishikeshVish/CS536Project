@@ -28,7 +28,7 @@ for n in 2 6 12; do
     dir=$rootdir/n$n
     python outcast.py --bw $bw \
         --dir $dir \
-        -t 60 \
+        -t 10 \
         -n $n
     python util/plot_rate.py --rx \
         --maxy $bw \
