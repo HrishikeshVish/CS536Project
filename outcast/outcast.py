@@ -16,7 +16,7 @@ from mininet.cli import CLI
 from time import sleep, time
 from multiprocessing import Process
 from subprocess import Popen
-import termcolor as T
+# import termcolor as T
 import argparse
 
 import sys
@@ -27,10 +27,10 @@ def cprint(s, color, cr=True):
     """Print in color
        s: string to print
        color: color to use"""
-    if cr:
-        print(T.colored(s, color))
-    else:
-        print(T.colored(s, color))
+    # if cr:
+    #     print(T.colored(s, color))
+    # else:
+    #     print(T.colored(s, color))
 
 parser = argparse.ArgumentParser(description="Outcast tests")
 parser.add_argument('--bw', '-b',
@@ -133,7 +133,8 @@ def waitListening(client, server, port):
 
 def progress(t):
     while t > 0:
-        cprint('  %3d seconds left  \r' % (t), 'cyan', cr=False)
+        # cprint('  %3d seconds left  \r' % (t), 'cyan', cr=False)
+        print('  %3d seconds left  \r' % (t))
         t -= 1
         sys.stdout.flush()
         sleep(1)
@@ -213,11 +214,13 @@ def main():
     net = Mininet(topo=topo, link=link)
 
     net.start()
-
-    cprint("*** Dumping network connections:", "green")
+    
+    # cprint("*** Dumping network connections:", "green")
+    print("*** Dumping network connections:")
     dumpNetConnections(net)
 
-    cprint("*** Testing connectivity", "blue")
+    # cprint("*** Testing connectivity", "blue")
+    print("*** Testing connectivity")
 
     net.pingAll()
 
@@ -225,13 +228,15 @@ def main():
         # Run CLI instead of experiment
         CLI(net)
     else:
-        cprint("*** Running experiment", "magenta")
+        # cprint("*** Running experiment", "magenta")
+        print("*** Running experiment")
         run_outcast_expt(net, n=args.n)
 
     net.stop()
     end = time()
     os.system("killall -9 bwm-ng")
-    cprint("Experiment took %.3f seconds" % (end - start), "yellow")
+    # cprint("Experiment took %.3f seconds" % (end - start), "yellow")
+    print("Experiment took %.3f seconds" % (end - start))
 
 if __name__ == '__main__':
     check_prereqs()
