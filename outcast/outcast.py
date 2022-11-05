@@ -100,7 +100,7 @@ class OutcastTopo(Topo):
 	
         self.addLink(h0, s1, port1=0, port2=h0Switch, **lconfig)
         self.addLink(aggrSwitch, s1, port1=1, port2=aggrSwitchPort, **lconfig)
-        #self.addLink(s1, receiver, port1=switchRec, port2=0, **lconfig)
+        # self.addLink(s1, receiver, port1=switchRec, port2=0, **lconfig)
         self.addLink(receiver, s1, port1=0, port2=switchRec, **lconfig)
 
 
@@ -149,6 +149,7 @@ def stop_tcpprobe():
 def run_outcast_expt(net, n):
     "Run experiment"
 
+    # the seconds determine the number of datapoints for each host
     seconds = args.time
 
     # Start the bandwidth and cwnd monitors in the background
@@ -176,9 +177,10 @@ def run_outcast_expt(net, n):
     
     for i in range(0, n+1):
         node_name = 'h' + str(i)
-    sender = net.getNodeByName(node_name)
-    sender.sendCmd('iperf -Z reno -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, node_name))
-   
+        # This was indented outside
+        sender = net.getNodeByName(node_name)
+        sender.sendCmd('iperf -Z reno -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, node_name))
+     
     for i in range(0,n+1):
         sender = net.getNodeByName('h' + str(i))
         sender.waitOutput()

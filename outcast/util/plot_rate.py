@@ -1,4 +1,5 @@
 from helper import *
+from collections import defaultdict
 
 # Create a parser and add arguments
 parser = argparse.ArgumentParser()
@@ -103,7 +104,7 @@ if args.normalise and args.labels == []:
     raise "Labels required if summarising/normalising."
     sys.exit(-1)
 
-bw = map(lambda e: int(e.replace('M','')), args.labels)
+bw = list(map(lambda e: int(e.replace('M','')), args.labels))
 idx = 0
 
 offset = 0
@@ -112,13 +113,18 @@ offset_diff = 10
 def offset_data(data):
     return [x + offset for x in data] + [offset]
 
+'''
+Parses the file 'f' and populates the 'rate' map
+'''
+
 for f in args.files:
     data = read_list(f)
     #xaxis = map(float, col(0, data))
     #start_time = xaxis[0]
     #xaxis = map(lambda x: x - start_time, xaxis)
     #rate = map(float, col(2, data))
-    rate = {}
+    rate = defaultdict(list)
+
     column = 2
     if args.rx:
         column = 3
@@ -128,7 +134,7 @@ for f in args.files:
             ifname = row[1]
         except:
             break
-        
+
         if ifname not in ['eth0', 'lo']:
             if ifname not in rate:
                 rate[ifname] = []
@@ -149,13 +155,14 @@ for f in args.files:
                 print(k)
                 vals = filter(lambda e: e < 1500, rate[k][10:-10])
                 if args.normalise:
-                    vals = map(lambda e: e / bw[idx], vals)
+                    vals = list(map(lambda e: e / bw[idx], vals))
+                    
                     idx += 1
                 to_plot.append(vals)
     else:
+        # The length of rate[key] is time + 1 (time is defined in the outcast-)
         for k in sorted(rate.keys()):
             if pat_iface.match(k):
-                print(k)
                 plt.fill(offset_data(rate[k]), label=k, zorder=-1 * offset)
                 offset += offset_diff
 
