@@ -125,9 +125,10 @@ for f in args.files:
     #rate = map(float, col(2, data))
     rate = defaultdict(list)
 
-    column = 2
-    if args.rx:
-        column = 3
+    # Changed from 2, 3 to 5, 6
+    column = 5 if args.rx else 6
+    # if args.rx:
+    #     column = 5
     for row in data:
         row = list(row)
         try:
@@ -148,7 +149,7 @@ for f in args.files:
         metric = lambda l: max(l) / 2
 
     offset_diff = int(metric([metric(row) for key, row in rate.items() if pat_iface.match(key)]) * 1.5) + 1
-
+        
     if args.summarise:
         for k in rate.keys():
             if pat_iface.match(k):

@@ -34,7 +34,7 @@ for n in 2 6 12; do
         --maxy $bw \
         --xlabel 'Time (s)' \
         --ylabel 'Rate (Mbps)' \
-        -i '(s2-eth[1-9].*)|(s1-eth1)' \
+        -i '(s2-eth[2-9])|(s2-eth1[0-9])|(s1-eth1)' \
         -f $dir/bwm.txt \
         -o $dir/rate.png
     python util/plot_tcpprobe.py \
