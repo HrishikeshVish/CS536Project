@@ -19,7 +19,7 @@ def first(lst):
 
 def second(lst):
     # previously was just map(lambda e: e[0], lst)
-    return list(map(lambda e: e[1], lst)
+    return list(map(lambda e: e[1], lst))
 
 """
 Sample line:
