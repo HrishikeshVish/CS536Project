@@ -14,9 +14,11 @@ parser.add_argument('-H', '--histogram', dest="histogram",
 args = parser.parse_args()
 
 def first(lst):
+    # previously was just map(lambda e: e[0], lst)
     return list(map(lambda e: e[0], lst))
 
 def second(lst):
+    # previously was just map(lambda e: e[0], lst)
     return list(map(lambda e: e[1], lst)
 
 """
