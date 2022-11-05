@@ -189,7 +189,7 @@ def run_outcast_expt(net, n):
 
     # Shut down monitors
     monitor.terminate()
-    #stop_tcpprobe()
+    stop_tcpprobe()
 
 def check_prereqs():
     "Check for necessary programs"
