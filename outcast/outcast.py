@@ -155,7 +155,7 @@ def run_outcast_expt(net, n):
     monitor = Process(target=monitor_devs_ng, 
             args=('%s/bwm.txt' % args.dir, 1.0))
     monitor.start()
-    # start_tcpprobe()
+    start_tcpprobe()
 
     # Get receiver and clients
     recvr = net.getNodeByName('receiver')

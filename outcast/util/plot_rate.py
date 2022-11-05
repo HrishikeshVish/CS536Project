@@ -1,5 +1,6 @@
 from helper import *
 
+# Create a parser and add arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--files', '-f',
                     help="Rate timeseries output to one plot",
@@ -122,12 +123,14 @@ for f in args.files:
     if args.rx:
         column = 3
     for row in data:
+        row = list(row)
         try:
             ifname = row[1]
         except:
             break
+        
         if ifname not in ['eth0', 'lo']:
-            if not rate.has_key(ifname):
+            if ifname not in rate:
                 rate[ifname] = []
             try:
                 rate[ifname].append(float(row[column]) * 8.0 / (1 << 20))
@@ -137,6 +140,7 @@ for f in args.files:
     metric = avg
     if args.metric == 'max':
         metric = lambda l: max(l) / 2
+
     offset_diff = int(metric([metric(row) for key, row in rate.items() if pat_iface.match(key)]) * 1.5) + 1
 
     if args.summarise:

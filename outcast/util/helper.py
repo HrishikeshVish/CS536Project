@@ -62,6 +62,8 @@ def transpose(l):
     return zip(*l)
 
 def avg(lst):
+    # list param is empty causing a div by zero error
+    # print(f"list {lst} is empty")
     return sum(map(float, lst)) / len(lst)
 
 def stdev(lst):

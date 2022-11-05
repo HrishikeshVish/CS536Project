@@ -14,31 +14,35 @@ parser.add_argument('-H', '--histogram', dest="histogram",
 args = parser.parse_args()
 
 def first(lst):
-    return map(lambda e: e[0], lst)
+    return list(map(lambda e: e[0], lst))
 
 def second(lst):
-    return map(lambda e: e[1], lst)
+    return list(map(lambda e: e[1], lst)
 
 """
 Sample line:
 2.221032535 10.0.0.2:39815 10.0.0.1:5001 32 0x1a2a710c 0x1a2a387c 11 2147483647 14592 85
 """
-def parse_file(f):
+def parse_file(file):
+    print(f"file name: {file}")
     times = defaultdict(list)
     cwnd = defaultdict(list)
     srtt = []
-    for l in open(f).xreadlines():
-        fields = l.strip().split(' ')
-        if len(fields) != 10:
-            break
-        if fields[2].split(':')[1] != args.port:
-            continue
-        sport = int(fields[1].split(':')[1])
-        times[sport].append(float(fields[0]))
+    
+    # for l in open(f).xreadlines():
+    with open(file) as f:
+        for l in f:
+            fields = l.strip().split(' ')
+            if len(fields) != 10:
+                break
+            if fields[2].split(':')[1] != args.port:
+                continue
+            sport = int(fields[1].split(':')[1])
+            times[sport].append(float(fields[0]))
 
-        c = int(fields[6])
-        cwnd[sport].append(c * 1480 / 1024.0)
-        srtt.append(int(fields[-1]))
+            c = int(fields[6])
+            cwnd[sport].append(c * 1480 / 1024.0)
+            srtt.append(int(fields[-1]))
     return times, cwnd
 
 added = defaultdict(int)
@@ -46,8 +50,12 @@ events = []
 
 def plot_cwnds(ax):
     global events
+    print(f"ax {ax}")
     for f in args.files:
+        print(f"file {f}")
         times, cwnds = parse_file(f)
+        # print("f {f} times {times} cwnds {cwnds} cwnds.keys() {cwnds.keys()}")
+
         for port in sorted(cwnds.keys()):
             t = times[port]
             cwnd = cwnds[port]
