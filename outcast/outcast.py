@@ -177,7 +177,7 @@ def run_outcast_expt(net, n):
     
     for i in range(0, n+1):
         node_name = 'h' + str(i)
-        # This was indented outside
+        # This was indented outside earlier
         sender = net.getNodeByName(node_name)
         sender.sendCmd('iperf -Z reno -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, node_name))
      
