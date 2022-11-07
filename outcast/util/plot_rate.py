@@ -21,6 +21,10 @@ parser.add_argument('--out', '-o',
                     help="Output png file for the plot.",
                     default=None, # Will show the plot
                     dest="out")
+parser.add_argument('--bwout',
+                    help="Output png file for the avg bw plot.",
+                    default='avg_bw.png', # Will show the plot
+                    dest="bwout")
 
 parser.add_argument('-s', '--summarise',
                     help="Summarise the time series plot (boxplot).  First 10 and last 10 values are ignored.",
@@ -64,6 +68,12 @@ parser.add_argument('--maxy',
                     action="store",
                     dest="maxy")
 
+parser.add_argument('--n',
+                    help="Number of senders on more hop",
+                    default=2,
+                    action="store",
+                    dest="n")
+
 parser.add_argument('--maxx',
                     help="Max sec on x-axis..",
                     default=60,
@@ -96,8 +106,13 @@ if args.labels is None:
 pat_iface = re.compile(args.pat_iface)
 
 to_plot=[]
-"""Output of bwm-ng csv has the following columns:
-unix_timestamp;iface_name;bytes_out;bytes_in;bytes_total;packets_out;packets_in;packets_total;errors_out;errors_in
+# avg_bw[flow - 0/1, 0: s1-eth1][(curr-start)/10] = list of all the bw/s in
+# this time interval
+avg_bw = [[[] for x in range(7)] for y in range(2)]
+
+
+"""Output of bwm-ng csv has the following columns: https://github.com/vgropp/bwm-ng
+timestamp;iface_name;bytes_out/s;bytes_in/s;bytes_total/s;bytes_in;bytes_out;packets_out/s;packets_in/s;packets_total/s;packets_in;...
 """
 
 if args.normalise and args.labels == []:
@@ -107,6 +122,7 @@ if args.normalise and args.labels == []:
 bw = list(map(lambda e: int(e.replace('M','')), args.labels))
 idx = 0
 
+start_time = 0
 offset = 0
 offset_diff = 10
 
@@ -119,16 +135,10 @@ Parses the file 'f' and populates the 'rate' map
 
 for f in args.files:
     data = read_list(f)
-    #xaxis = map(float, col(0, data))
-    #start_time = xaxis[0]
-    #xaxis = map(lambda x: x - start_time, xaxis)
-    #rate = map(float, col(2, data))
     rate = defaultdict(list)
 
     # Changed from 2, 3 to 5, 6
     column = 5 if args.rx else 6
-    # if args.rx:
-    #     column = 5
     for row in data:
         row = list(row)
         try:
@@ -136,6 +146,8 @@ for f in args.files:
         except:
             break
 
+        if start_time == 0:
+            start_time = float(row[0])
         if ifname not in ['eth0', 'lo']:
             if ifname not in rate:
                 rate[ifname] = []
@@ -143,6 +155,13 @@ for f in args.files:
                 rate[ifname].append(float(row[column]) * 8.0 / (1 << 20))
             except:
                 break
+            # store the b/w for avg throughput calculation
+            if ifname.strip() == 's1-eth1':
+                time_offset = float(row[0]) - float(start_time)
+                avg_bw[0][int(time_offset//10)].append(float(row[column]) * 8.0 / (1 << 20))
+            else:
+                time_offset = float(row[0]) - float(start_time)
+                avg_bw[1][int(time_offset//10)].append(float(row[column]) * 8.0 / (1 << 20))
 
     metric = avg
     if args.metric == 'max':
@@ -208,3 +227,25 @@ if args.out:
 else:
     plt.show()
 
+
+# plot the avg bandwidth
+plt.clf()
+
+# get the mean of all the entries
+fig = plt.figure(figsize = (10, 5))
+barWidth = 1.75
+x_other = [0, 10, 20, 30, 40, 50]
+x_h1 = [x + barWidth for x in x_other]
+other_bw = [0.0 if len(x) == 0 else (sum(x)/len(x)) for x in avg_bw[1]]
+h1_bw = [0.0 if len(x) == 0 else (sum(x)/len(x)) for x in avg_bw[0]]
+print(other_bw)
+print(h1_bw)
+# the last index is for the 60th second, that has sometimes erroneous figures
+plt.bar(x_other, other_bw[:-1], color ='r', width = barWidth, edgecolor ='grey', label ='3 hop flow')
+plt.bar(x_h1, h1_bw[:-1], color ='b', width = barWidth, edgecolor ='grey', label ='2 hop flow')
+plt.xlabel('Time', fontweight ='bold', fontsize = 15)
+plt.ylabel('Avg Throughput(mbps)', fontweight ='bold', fontsize = 15)
+plt.title(f'Avg Throughput with {args.n} 3-Hop flows & 1 2-Hop flow.')
+plt.xticks(x_other)
+plt.legend()
+plt.savefig(args.bwout)

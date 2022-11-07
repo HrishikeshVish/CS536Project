@@ -34,9 +34,11 @@ for n in 2 6 12; do
         --maxy $bw \
         --xlabel 'Time (s)' \
         --ylabel 'Rate (Mbps)' \
-        -i '(s2-eth[2-9])|(s2-eth1[0-9])|(s1-eth1)' \
+        --n $n \
+	-i '(s2-eth[2-9])|(s2-eth1[0-9])|(s1-eth1)' \
         -f $dir/bwm.txt \
-        -o $dir/rate.png
+        -o $dir/rate.png \
+	--bwout $dir/avg_bw.png
     python util/plot_tcpprobe.py \
         -f $dir/tcp_probe.txt \
         -o $dir/cwnd.png
