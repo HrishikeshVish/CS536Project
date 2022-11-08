@@ -23,7 +23,7 @@ plotpath=util
 num_hosts=1
 iface=s0-eth1
 #iperf=~/iperf-patched/src/iperf
-iperf=/usr/bin/iperf
+iperf=iperf
 
 queue_size=25
 bw=5
@@ -32,10 +32,10 @@ for run in 1; do
 for flows_per_host in 1; do
 	dir=$rootdir/nf$flows_per_host-r$run
 
-	python tcppacing.py --dir $dir -n $num_hosts\
+	python3 tcppacing.py --dir $dir -n $num_hosts\
 		--nflows $flows_per_host --iperf $iperf --maxq $queue_size -b $bw
 
-	python tcppacing.py --dir $dir -n $num_hosts\
+	python3 tcppacing.py --dir $dir -n $num_hosts\
 		--nflows $flows_per_host --pacing --iperf $iperf --maxq $queue_size -b $bw
 
 	#python $plotpath/plot_queue.py -f $dir/qlen_$iface.txt -o $dir/q.png

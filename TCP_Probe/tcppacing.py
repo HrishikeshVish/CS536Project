@@ -43,9 +43,9 @@ def cprint(s, color, cr=True):
        s: string to print
        color: color to use"""
     if cr:
-        print T.colored(s, color)
+        print(T.colored(s, color))
     else:
-        print T.colored(s, color),
+        print(T.colored(s, color))
 
 
 # Parse arguments
@@ -116,7 +116,8 @@ parser.add_argument('--iperf',
 args = parser.parse_args()
 
 CUSTOM_IPERF_PATH = args.iperf
-assert(os.path.exists(CUSTOM_IPERF_PATH))
+#print(args.iperf)
+#assert(os.path.exists(CUSTOM_IPERF_PATH))
 
 if not os.path.exists(args.dir):
     os.makedirs(args.dir)
@@ -140,7 +141,7 @@ class StarTopo(Topo):
         self.delay_net = delay_net
         self.bw_net = bw_net
         self.maxq = maxq
-	self.nflows = nflows
+        self.nflows = nflows
         self.create_topology()
 
     def create_topology(self):
@@ -151,14 +152,14 @@ class StarTopo(Topo):
 
         #bottleneck link
         #custom tweak to bypass Mininet/netem limitations
-	queue_size = self.maxq + (args.delay_net * self.bw_net * 1000) / (8 * ADVMSS)
-	#queue_size = self.maxq
+        queue_size = self.maxq + (args.delay_net * self.bw_net * 1000) / (8 * ADVMSS)
+	    #queue_size = self.maxq
         self.addLink(switch_client, switch_server,
 	           bw=self.bw_net, delay=self.delay_net, loss=0, max_queue_size=queue_size)
 
         # the sender-receiver pairs
-	bw = 4 * self.bw_net * self.nflows
-        for i in xrange(self.n):
+        bw = 4 * self.bw_net * self.nflows
+        for i in range(self.n):
             client = self.addHost('client%d' % i)
             self.addLink(client, switch_client,
 	           bw=bw, delay=self.delay_host, loss=0, max_queue_size=LARGE_QUEUE_VALUE)
@@ -219,7 +220,7 @@ def start_tmon(iface, interval_sec=0.1):
 
 # set TCP MSS to ADVMSS
 def set_advmss(host):
-    print 'setting advmss of host %s to %d' % (host.name, ADVMSS)
+    print ('setting advmss of host %s to %d' % (host.name, ADVMSS))
     host.cmd('ip route change 10.0.0.0/8 dev %s-eth0 advmss %d' % (host.name, ADVMSS))
 
 def count_connections():
@@ -285,7 +286,7 @@ def get_rates(iface, nsamples=NSAMPLES, period=SAMPLE_PERIOD_SEC,
             # Wait for 1 second sample
             ret.append(rate)
         last_txbytes = txbytes
-        print '.',
+        print ('.')
         sys.stdout.flush()
         sleep(period)
     return ret
@@ -327,28 +328,28 @@ def do_ping(net, h1, h2):
     rtt = 2 * (args.delay_net + 2 * args.delay_host)
     diff = abs(avgRtt - rtt)
     if((diff / rtt) > 0.1): #rough verification
-        print diff
+        print (diff)
         raise Exception('Latency check failed')
     return avgRtt
 
 
 # verify the latency settings of the topology
 def verify_latency(net):
-    print "Verifying latency (avg RTT)..."
+    print ("Verifying latency (avg RTT)...")
     client = net.getNodeByName('client0')
     server = net.getNodeByName('server0')
     #for h in hosts:
         #print "%s <-> server: %sms" % (h.name, do_ping(net, h, server))
-    print "%s <-> %s: %sms" % (client.name, server.name, do_ping(net, client, server))
+    print ("%s <-> %s: %sms" % (client.name, server.name, do_ping(net, client, server)))
     cprint("Latency check passed", "green")
 
 # verify the bandwidth settings of the topology
 def verify_bandwidth(net, nb = 0):
-    print "Verifying bandwidth..."
+    print ("Verifying bandwidth...")
     s = net.getNodeByName('s0')
     c = net.getNodeByName('c0')
 
-    print "Generating TCP traffic using iperf..."
+    print ("Generating TCP traffic using iperf...")
     server = s.popen("%s -s" % (CUSTOM_IPERF_PATH))
     client = c.popen("%s -c %s -t 100" % (CUSTOM_IPERF_PATH, s.IP()))
     medRate = median(get_rates('s1-eth1'))
@@ -359,7 +360,7 @@ def verify_bandwidth(net, nb = 0):
         else:
             cprint("Bandwidth check failed, second try", "red")
             verify_bandwidth(net, nb = 1)
-    print "Host - server bandwidth: %.3fMb/s" % medRate
+    print ("Host - server bandwidth: %.3fMb/s" % medRate)
     client.kill()
     server.kill()
 
@@ -425,7 +426,7 @@ def main():
     for s in xrange(args.n):
         servers.append(net.getNodeByName('server%d' % s))
     for s in servers:
-	print s.name
+        print(s.name)
 
     for h in (clients + servers):
         set_advmss(h)
@@ -476,9 +477,9 @@ if __name__ == '__main__':
     try:
         main()
     except:
-        print "-"*80
-        print "Caught exception.  Cleaning up..."
-        print "-"*80
+        print("-"*80)
+        print("Caught exception.  Cleaning up...")
+        print("-"*80)
         import traceback
         traceback.print_exc()
         os.system("killall -9 top bwm-ng tcpdump cat mnexec %s; mn -c" % (
