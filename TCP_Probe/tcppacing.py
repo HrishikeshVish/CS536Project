@@ -415,15 +415,15 @@ def main():
     topo = StarTopo(n=args.n, delay_host='%sms' % args.delay_host,
                     delay_net='%sms' % args.delay_net,
                     bw_net=args.bw_net, maxq=args.maxq, nflows=args.nflows)
-    net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink)
+    net = Mininet(topo=topo)
     net.start()
     #net.startTerms()
     dumpNodeConnections(net.hosts)
     net.pingAll()
 
-    for c in xrange(args.n):
+    for c in range(args.n):
         clients.append(net.getNodeByName('client%d' % c))
-    for s in xrange(args.n):
+    for s in range(args.n):
         servers.append(net.getNodeByName('server%d' % s))
     for s in servers:
         print(s.name)
