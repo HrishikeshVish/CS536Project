@@ -245,7 +245,7 @@ plt.bar(x_other, other_bw[:-1], color ='r', width = barWidth, edgecolor ='grey',
 plt.bar(x_h1, h1_bw[:-1], color ='b', width = barWidth, edgecolor ='grey', label ='2 hop flow')
 plt.xlabel('Time', fontweight ='bold', fontsize = 15)
 plt.ylabel('Avg Throughput(mbps)', fontweight ='bold', fontsize = 15)
-plt.title(f'Avg Throughput with {args.n} 3-Hop flows & 1 2-Hop flow.')
+plt.title('Avg Throughput with  3-Hop flows & 1 2-Hop flow.')
 plt.xticks(x_other)
 plt.legend()
 plt.savefig(args.bwout)

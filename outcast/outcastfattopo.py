@@ -6,41 +6,76 @@ from multiprocessing import Process
 from subprocess import Popen
 import shlex
 from mininet.node import RemoteController
-from ripl.dctopo import FatTreeTopo
+from topo_ft import FatTreeTopo
 from mininet.node import CPULimitedHost
 from mininet.link import TCLink
 from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.util import custom, dumpNetConnections
-
+from mininet.clean import cleanup
 from util.monitor import monitor_devs_ng
+
+from subprocess import Popen, PIPE
+import os
+import sys
+import atexit
+import signal
+import glob
 
 # we get arg parsing for free!
 from outcast import start_tcpprobe, stop_tcpprobe, args, waitListening
 
+K = 4
+
+CONTROLLERS = {
+    '2level': 'controller_2level',
+    'dijkstra': 'controller_dj'
+}
+
+def run_pox():
+    controller = CONTROLLERS['2level']
+    p_pox = Popen(
+        [os.environ['HOME'] + '/pox/pox.py', 'fakearp', controller, '--topo=fattree,%d'%K, '--install'],
+        # make pox ignore sigint so we can ctrl-c mininet stuff without killing pox
+        preexec_fn=lambda: signal.signal(signal.SIGINT, signal.SIG_IGN)
+    )
+    atexit.register(p_pox.kill)
+
+
 def main():
-    k = int(args.n)
+
+    atexit.register(cleanup)
+    # just in case program gets interrupted before iperfs get killed
+    atexit.register(lambda: os.system('killall iperf 2> /dev/null'))
+
+    run_pox()
+
+    sleep(10)
+
+    k = 4
     topo = FatTreeTopo(k=k)
 
     host = custom(CPULimitedHost, cpu=.5)  # 15% of system bandwidth
     link = custom(TCLink, bw=args.bw, delay='.05ms',
                   max_queue_size=200)
 
-    net = Mininet(topo=topo, host=host, link=link, controller=RemoteController,autoSetMacs=True)
+    net = Mininet(topo=topo, host=host, link=link, controller=RemoteController, autoSetMacs=True)
 
     net.start()
 
+    sleep(5)
+
     print "*** Dumping network connections:"
     dumpNetConnections(net)
-    raw_args = shlex.split("/home/ubuntu/pox/pox.py riplpox.riplpox --topo=ft,%s --routing=%s" % (k, args.routing))
+    # raw_args = shlex.split("/home/ubuntu/pox/pox.py riplpox.riplpox --topo=ft,%s --routing=%s" % (k, args.routing))
 
-    proc = Popen(raw_args)
+    # proc = Popen(raw_args)
 
-    print "********************************************************"
-    print "*******************STARTED RIPLPOX**********************"
+    # print "********************************************************"
+    # print "*******************STARTED RIPLPOX**********************"
 
-    #This sleep 10 is to give the riplpox controller time to start up before you start sending.  Seems to work well.
-    sleep(10)
+    # #This sleep 10 is to give the riplpox controller time to start up before you start sending.  Seems to work well.
+    # sleep(10)
 
 
     # 
@@ -56,8 +91,8 @@ def main():
     start_tcpprobe()
 
     # Get receiver and clients
-    recvr = net.getNodeByName('0_0_2')
-    sender1 = net.getNodeByName('0_0_3')
+    recvr = net.getNodeByName('p0_s0_h2')
+    sender1 = net.getNodeByName('p0_s0_h3')
 
     # Start the receiver
     port = 5001
@@ -77,8 +112,7 @@ def main():
             for h in range(2, (k/2)+2):  # Host Range
                 if p == 0 and e == 0: 
                     continue
-                
-                node_name = '_'.join(str(x) for x in [p, e, h])
+                node_name = 'p%d_s%d_h%d' % (p, e, h)
                 sender = net.getNodeByName(node_name)
                 sender.sendCmd('iperf -Z reno -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, node_name))
    
@@ -87,7 +121,7 @@ def main():
             for h in range(2, (k/2)+2):  # Host Range
                 if p == 0 and e == 0: 
                     continue
-                node_name = '_'.join(str(x) for x in [p, e, h])
+                node_name = 'p%d_s%d_h%d' % (p, e, h)
                 sender = net.getNodeByName(node_name)
                 sender.waitOutput()
 

@@ -47,7 +47,7 @@ for n in 4; do
 	--metric 'max' \
         --xlabel 'Time (s)' \
         --ylabel 'Rate (Mbps)' \
-        -i $i \
+        -i 'p[0-3]_s[0-1]_h[2-3]-eth0' \
         -f $dir/bwm.txt \
         -o $dir/rate.png
     python util/plot_tcpprobe.py \
