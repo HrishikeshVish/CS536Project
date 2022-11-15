@@ -56,9 +56,9 @@ def cprint(s, color, cr=True):
        s: string to print
        color: color to use"""
     if cr:
-        print T.colored(s, color)
+        print (T.colored(s, color))
     else:
-        print T.colored(s, color),
+        print (T.colored(s, color))
 
 
 # Parse arguments
@@ -258,7 +258,7 @@ def get_rates(iface, nsamples=NSAMPLES, period=SAMPLE_PERIOD_SEC,
             # Wait for 1 second sample
             ret.append(rate)
         last_txbytes = txbytes
-        print '.',
+        print ('.')
         sys.stdout.flush()
         sleep(period)
     return ret
@@ -321,7 +321,7 @@ def do_sweep(iface):
     while wait_time > 0 and succeeded != nflows:
         wait_time -= 1
         succeeded = count_connections()
-        print 'Connections %d/%d succeeded\r' % (succeeded, nflows),
+        print ('Connections %d/%d succeeded\r' % (succeeded, nflows))
         sys.stdout.flush()
         sleep(1)
 
@@ -331,12 +331,12 @@ def do_sweep(iface):
     monitor.start()
 
     if succeeded != nflows:
-        print 'Giving up'
+        print ('Giving up')
         return -1
 
     # Set the speed back to the bottleneck link speed.
     set_speed(iface, "%.2fMbit" % args.bw_net)
-    print "\nSetting q=%d " % max_q,
+    print ("\nSetting q=%d " % max_q)
     sys.stdout.flush()
     set_q(iface, max_q)
 
@@ -344,7 +344,7 @@ def do_sweep(iface):
     reference_rate = 0.0
     while reference_rate <= args.bw_net * START_BW_FRACTION:
         rates = get_rates(iface, nsamples=CALIBRATION_SAMPLES+CALIBRATION_SKIP)
-        print "measured calibration rates: %s" % rates
+        print ("measured calibration rates: %s" % rates)
         # Ignore first N; need to ramp up to full speed.
         rates = rates[CALIBRATION_SKIP:]
         reference_rate = median(rates)
@@ -357,7 +357,7 @@ def do_sweep(iface):
         
     while abs(min_q - max_q) >= 2:
         mid = (min_q + max_q) / 2
-        print "Trying q=%d  [%d,%d] " % (mid, min_q, max_q),
+        print ("Trying q=%d  [%d,%d] " % (mid, min_q, max_q))
         sys.stdout.flush()
 
         # Binary search over queue sizes.
@@ -382,7 +382,7 @@ def do_sweep(iface):
             min_q = mid
 
     monitor.terminate()
-    print "*** Minq for target: %d" % max_q
+    print ("*** Minq for target: %d" % max_q)
     return max_q
 
 # do pings from h1 to h2 and evaluates the avg time it takes
@@ -398,29 +398,29 @@ def do_ping(net, h1, h2):
     rtt = args.delay * 2
     diff = abs(avgRtt - rtt)
     if((diff / rtt) > 0.1): #rough verification
-        print diff
+        print (diff)
         raise Exception('Latency check failed')
     return avgRtt
     
 
 # verify the latency settings of the topology
 def verify_latency(net):
-    print "Verifying latency (avg RTT)..."
+    print ("Verifying latency (avg RTT)...")
     server = net.getNodeByName('server')
     for h in hosts:
-        print "%s <-> server: %sms" % (h.name, do_ping(net, h, server))
+        print ("%s <-> server: %sms" % (h.name, do_ping(net, h, server)))
     cprint("Latency check passed", "green")
 
 # verify the bandwidth settings of the topology
 def verify_bandwidth(net, nb = 0):
-    print "Verifying bandwidth..."
+    print ("Verifying bandwidth...")
     s = net.getNodeByName('server')
     hA = hosts[0]
     hB = hosts[1]
 
     bw_max = args.bw_host * 1000 * 1000
     
-    print "Generating TCP traffic using iperf..."
+    print ("Generating TCP traffic using iperf...")
     server = s.popen("iperf -s")
     client = hA.popen("iperf -c %s -t 100" % (s.IP()))
     medRate = median(get_rates('s0-eth1'))
@@ -431,18 +431,18 @@ def verify_bandwidth(net, nb = 0):
         else:
             cprint("Bandwidth check failed, second try", "red")
             verify_bandwidth(net, nb = 1)
-    print "Host - server bandwidth: %.3fMb/s" % medRate
+    print ("Host - server bandwidth: %.3fMb/s" % medRate)
     client.kill()
     server.kill()
     
     if(not args.fast):
-        print "Generating UDP traffic using iperf..."
+        print ("Generating UDP traffic using iperf...")
         server = hB.popen("iperf -u -s")
         client = hA.popen("iperf -u -c %s -b %fg -t 100" % (hB.IP(), args.bw_host))
         medRate = median(get_rates('s0-eth3'))
         client.kill()
         server.kill()
-        print "Host - host bandwidth (informational): %.3fMb/s" % medRate
+        print ("Host - host bandwidth (informational): %.3fMb/s" % medRate)
         
     cprint("Bandwidth check passed", "green")
     os.system('killall -9 iperf')
@@ -552,9 +552,9 @@ if __name__ == '__main__':
     try:
         main()
     except:
-        print "-"*80
-        print "Caught exception.  Cleaning up..."
-        print "-"*80
+        print ("-"*80)
+        print ("Caught exception.  Cleaning up...")
+        print ("-"*80)
         import traceback
         traceback.print_exc()
         os.remove("ping.txt")

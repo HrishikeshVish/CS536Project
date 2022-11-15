@@ -52,10 +52,10 @@ def col(n, obj = None, clean = lambda e: e):
         try:
             return clean(obj[n])
         except:
-            print T.colored('col(...): column "%s" not found!' % (n), 'red')
+            print (T.colored('col(...): column "%s" not found!' % (n), 'red'))
             return None
     # We wouldn't know what to do here, so just return None
-    print T.colored('col(...): column "%s" not found!' % (n), 'red')
+    print (T.colored('col(...): column "%s" not found!' % (n), 'red'))
     return None
 
 def transpose(l):

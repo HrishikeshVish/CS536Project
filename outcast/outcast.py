@@ -15,7 +15,7 @@ from mininet.cli import CLI
 
 from time import sleep, time
 from multiprocessing import Process
-from subprocess import Popen
+from subprocess import Popen, PIPE
 # import termcolor as T
 import argparse
 
@@ -41,7 +41,9 @@ parser.add_argument('--bw', '-b',
 parser.add_argument('--dir', '-d',
                     help="Directory to store outputs",
                     default="results")
-
+parser.add_argument('--buffdir', '-f',
+                    help="Directory to store Buffering outputs",
+                    default="results")
 parser.add_argument('-n',
                     type=int,
                     help=("Number of senders"
@@ -200,6 +202,113 @@ def check_prereqs():
             raise Exception((
                 'Could not find %s - make sure that it is '
                 'installed and in your $PATH') % p)
+def count_connections():
+    "Count current connections in iperf output file"
+    out = args.dir + "/iperf_server.txt"
+    lines = Popen("grep connected %s | wc -l" % out,
+                  shell=True, stdout=PIPE).communicate()[0]
+    return int(lines)
+def set_speed(iface, spd):
+    "Change htb maximum rate for interface"
+    cmd = ("tc class change dev %s parent 1:0 classid 1:1 "
+           "htb rate %s burst 15k" % (iface, spd))
+    os.system(cmd)
+
+def do_sweep(iface, nflows):
+    """Sweep queue length until we hit target utilization.
+       We assume a monotonic relationship and use a binary
+       search to find a value that yields the desired result"""
+    bw_net = 62.5
+
+    delay = 43.5
+    n = 3
+    bdp = bw_net * 2 * delay * 1000.0 / 8.0 / 1500.0
+    nflows = nflows * (n - 1)
+    if(nflows == 0):
+        nflows = 1
+    
+    # if we just want to generate a graph fast, then we can anticipate...
+    if(False):
+        bdp = bdp / sqrt(nflows)
+    
+    min_q, max_q = 1, int(bdp)
+
+    # Set a higher speed on the bottleneck link in the beginning so
+    # flows quickly connect
+    set_speed(iface, "2Gbit")
+
+    succeeded = 0
+    wait_time = 300
+    while wait_time > 0 and succeeded != nflows:
+        wait_time -= 1
+        succeeded = count_connections()
+        print ('Connections %d/%d succeeded\r' % (succeeded, nflows))
+        sys.stdout.flush()
+        sleep(1)
+
+    monitor = Process(target=monitor_qlen,
+                      args=(iface, 0.01, '%s/qlen_%s.txt' %
+                            (args.buffdir, iface)))
+    monitor.start()
+
+    if succeeded != nflows:
+        print ('Giving up')
+        return -1
+
+    # Set the speed back to the bottleneck link speed.
+    set_speed(iface, "%.2fMbit" % bw_net)
+    print ("\nSetting q=%d " % max_q)
+    sys.stdout.flush()
+    set_q(iface, max_q)
+
+    # Wait till link is 100% utilised and train
+    reference_rate = 0.0
+    while reference_rate <= bw_net * START_BW_FRACTION:
+        rates = get_rates(iface, nsamples=CALIBRATION_SAMPLES+CALIBRATION_SKIP)
+        print ("measured calibration rates: %s" % rates)
+        # Ignore first N; need to ramp up to full speed.
+        rates = rates[CALIBRATION_SKIP:]
+        reference_rate = median(rates)
+        ru_max = max(rates)
+        ru_stdev = stdev(rates)
+        cprint ("Reference rate median: %.3f max: %.3f stdev: %.3f" %
+                (reference_rate, ru_max, ru_stdev), 'blue')
+        sys.stdout.flush()
+        
+        
+    while abs(min_q - max_q) >= 2:
+        mid = (min_q + max_q) / 2
+        print ("Trying q=%d  [%d,%d] " % (mid, min_q, max_q))
+        sys.stdout.flush()
+
+        # Binary search over queue sizes.
+        # (1) Check if a queue size of "mid" achieves required utilization
+        #     based on the median value of the measured rate samples.
+        # (2) Change values of max_q and min_q accordingly
+        #     to continue with the binary search
+        
+        # we use the median and not the average, in case one of the 
+        # measurements was biased by noise
+        
+        set_q(iface, mid)
+        acc = False
+        if(acc and nflows <= 10):
+            # see README for details about this particular case
+            ls = sorted(get_rates(iface, nsamples=5, period=5))
+            medianRate = avg(ls[1:-1])
+        else:
+            medianRate = median(get_rates(iface))
+        if ok(medianRate / reference_rate): #if buffer was big enough
+            max_q = mid
+        else:
+            min_q = mid
+
+    monitor.terminate()
+    print ("*** Minq for target: %d" % max_q)
+    return max_q
+
+
+
 
 def main():
     "Create and run experiment"
@@ -214,7 +323,8 @@ def main():
     net = Mininet(topo=topo, link=link)
 
     net.start()
-    
+    for flows in [3,7,13]:
+        ret = do_sweep(iface='s0-eth1', nflows=flows)
     # cprint("*** Dumping network connections:", "green")
     print("*** Dumping network connections:")
     dumpNetConnections(net)

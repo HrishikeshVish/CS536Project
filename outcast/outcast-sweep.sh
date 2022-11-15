@@ -7,7 +7,7 @@ set -e
 set -o nounset
 
 ctrlc() {
-	killall -9 python
+	killall -9 python3
 	mn -c
 	exit
 }
@@ -17,6 +17,7 @@ trap ctrlc SIGINT
 start=`date`
 exptid=`date +%b%d-%H:%M`
 rootdir=outcast-$exptid
+bufferdir=buffersizing-$exptid
 bw=100
 
 # Note: you need to make sure you report the results
@@ -26,11 +27,13 @@ bw=100
 
 for n in 2 6 12; do
     dir=$rootdir/n$n
-    python outcast.py --bw $bw \
+    buffdir=$bufferdir/nf-r1-regular
+    python3 outcast.py --bw $bw \
         --dir $dir \
         -t 60 \
         -n $n
-    python util/plot_rate.py --rx \
+        --buffdir $buffdir \
+    python3 util/plot_rate.py --rx \
         --maxy $bw \
         --xlabel 'Time (s)' \
         --ylabel 'Rate (Mbps)' \
@@ -39,7 +42,7 @@ for n in 2 6 12; do
         -f $dir/bwm.txt \
         -o $dir/rate.png \
 	--bwout $dir/avg_bw.png
-    python util/plot_tcpprobe.py \
+    python3 util/plot_tcpprobe.py \
         -f $dir/tcp_probe.txt \
         -o $dir/cwnd.png
 done
