@@ -15,6 +15,7 @@ from mininet.cli import CLI
 
 from time import sleep, time
 from multiprocessing import Process
+import subprocess
 from subprocess import Popen, PIPE
 # import termcolor as T
 import argparse
@@ -22,6 +23,7 @@ import argparse
 import sys
 import os
 from util.monitor import monitor_devs_ng
+from util.monitor import monitor_qlen
 
 def cprint(s, color, cr=True):
     """Print in color
@@ -213,7 +215,12 @@ def set_speed(iface, spd):
     cmd = ("tc class change dev %s parent 1:0 classid 1:1 "
            "htb rate %s burst 15k" % (iface, spd))
     os.system(cmd)
-
+def set_q(iface, q):
+    "Change queue size limit of interface"
+    cmd = ("tc qdisc change dev %s parent 1:1 "
+           "handle 10: netem limit %s" % (iface, q))
+    #os.system(cmd)
+    subprocess.check_output(cmd, shell=True)
 def do_sweep(iface, nflows):
     """Sweep queue length until we hit target utilization.
        We assume a monotonic relationship and use a binary
@@ -223,7 +230,8 @@ def do_sweep(iface, nflows):
     delay = 43.5
     n = 3
     bdp = bw_net * 2 * delay * 1000.0 / 8.0 / 1500.0
-    nflows = nflows * (n - 1)
+    #nflows = nflows * (n - 1)
+    nflows = 4
     if(nflows == 0):
         nflows = 1
     
@@ -236,6 +244,7 @@ def do_sweep(iface, nflows):
     # Set a higher speed on the bottleneck link in the beginning so
     # flows quickly connect
     set_speed(iface, "2Gbit")
+    print("*** Speed Set Successfully")
 
     succeeded = 0
     wait_time = 300
@@ -323,8 +332,7 @@ def main():
     net = Mininet(topo=topo, link=link)
 
     net.start()
-    for flows in [3,7,13]:
-        ret = do_sweep(iface='s0-eth1', nflows=flows)
+
     # cprint("*** Dumping network connections:", "green")
     print("*** Dumping network connections:")
     dumpNetConnections(net)
@@ -347,7 +355,9 @@ def main():
     os.system("killall -9 bwm-ng")
     # cprint("Experiment took %.3f seconds" % (end - start), "yellow")
     print("Experiment took %.3f seconds" % (end - start))
-
+    print("*** Testing Buffering")
+    for flows in [3,7,13]:
+        ret = do_sweep(iface='s1-eth1', nflows=flows)
 if __name__ == '__main__':
     check_prereqs()
     main()

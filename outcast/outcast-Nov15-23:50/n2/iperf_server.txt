@@ -1,0 +1,13 @@
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP congestion control set to reno
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+(null)local 10.0.0.4 port 5001 connected with 10.0.0.2 port 37992
+[  1] local 10.0.0.4 port 5001 connected with 10.0.0.1 port 45334
+[  2] local 10.0.0.4 port 5001 connected with 10.0.0.3 port 42324
+[  3] local 10.0.0.4 port 5001 connected with 10.0.0.2 port 38002
+[ ID] Interval       Transfer     Bandwidth
+[  1] 0.0000-62.1322 sec   304 MBytes  41.1 Mbits/sec
+[  3] 0.0000-62.2626 sec   203 MBytes  27.4 Mbits/sec
+[  2] 0.0000-62.5838 sec   201 MBytes  26.9 Mbits/sec
