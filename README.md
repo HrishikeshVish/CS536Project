@@ -69,3 +69,26 @@ python util/plot_rate.py --rx --maxy 1 --maxx 60 --metric 'max' --xlabel 'Time (
 --ylabel 'Rate (Mbps)' -i 'p[0-3]_s0-eth[1-2]' -f bwm.txt -o rate.png
 
 ```
+### The steps to run this experiment of unsynchronised flows:
+```
+# Make the following changes in the outcast.py file for simulating early start by 100ms:
+Add the following line of code after line 184:\
+if n==0: sleep(100/1000)
+# Make the following changes in the outcast.py file for simulating delay start by 100ms:
+Replace the line 179 by the following:\
+for i in range(n,-1,-1 ):
+Add the following line of code after line 184:\
+if n==1: sleep(100/1000) 
+# Make the following changes in the outcast.py file for simulating delay start by 200ms:
+Replace the line 179 by the following:\
+for i in range(n,-1,-1 ):
+Add the following line of code after line 184:\
+if n==1: sleep(200/1000) 
+
+
+
+
+
+
+
+```
