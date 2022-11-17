@@ -84,11 +84,19 @@ Replace the line 179 by the following:
 for i in range(n,-1,-1 ):
 Add the following line of code after line 184:
 if n==1: sleep(200/1000) 
+```
 
+### The steps to run experiments on different tcp variants:
+```
+# Make the following changes in the outcast.py file for simulating tcp cubic:
+Replace the line 168 by the following:
+recvr.cmd('iperf -Z cubic -s -p', port,'> %s/iperf_server.txt' % args.dir, '&')
+Replace the line 183 by the following:
+sender.sendCmd('iperf -Z cubic -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, node_name))
 
-
-
-
-
-
+# Make the following changes in the outcast.py file for simulating tcp newreno:
+Replace the line 168 by the following:
+recvr.cmd('iperf -Z newreno -s -p', port,'> %s/iperf_server.txt' % args.dir, '&')
+Replace the line 183 by the following:
+sender.sendCmd('iperf -Z newreno -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, node_name))
 ```
