@@ -100,3 +100,11 @@ recvr.cmd('iperf -Z newreno -s -p', port,'> %s/iperf_server.txt' % args.dir, '&'
 Replace the line 183 by the following:
 sender.sendCmd('iperf -Z newreno -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, node_name))
 ```
+### The steps to run experiments on tcp pacing:
+```
+# Make the following changes in the outcast.py file for simulating tcp pacing:
+Add the following two lines after the line 206:
+os.system("sysctl -w net.ipv4.tcp_pacing_ss_ratio=75")
+os.system("sysctl -w net.ipv4.tcp_pacing_ca_ratio=75")
+
+```
