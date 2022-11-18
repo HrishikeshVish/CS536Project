@@ -85,6 +85,9 @@ Test setup - [Mininet 2.2.2 VM with pox installed](https://github.com/mininet/mi
 git clone  https://github.com/HrishikeshVish/CS536Project.git
 cd CS536Project/outcast
 
+# checkout fattree-plot branch
+git checkout fattree-plot
+
 # create symlinks to ~/pox/ext - the default POX installation
 ln -s topo_ft.py ~/pox/ext/
 ln -s fakearp.py ~/pox/ext/
