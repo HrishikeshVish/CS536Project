@@ -1,5 +1,4 @@
 # pox controller implementing dijkstra shortest-path routing
-# morgan grant (mlgrant@ucsc.edu)
 
 import topo_ft
 
@@ -80,6 +79,7 @@ def dijkstra(topo, source):
 
 
 # register this controller to install dijkstra routing on each switch that connects
+# Reference: https://noxrepo.github.io/pox-doc/html/#communicating-with-datapaths-switches
 class install_dj(object):
 
     def __init__(self, topo):
@@ -87,6 +87,10 @@ class install_dj(object):
         self.topo = topo
 
     def _handle_ConnectionUp(self, event):
+        '''
+        Handling an event when a new control channel with a switch is established
+        Ref: https://noxrepo.github.io/pox-doc/html/#communicating-with-datapaths-switches
+        '''
         connection = event.connection
         name = topo_ft.dpid_to_name(event.dpid)
         _, prev = dijkstra(self.topo, name)
@@ -95,9 +99,10 @@ class install_dj(object):
             while prev[u] != name:
                 u = prev[u]
             port, _ = self.topo.port(name, u)
-
+            # ofp_flow_mod: instructs a switch to install a flow table entry. Flow table entries 
+            # match some fields of incoming packets, and executes some list of actions on matching packets.
             msg = of.ofp_flow_mod()
-            msg.match.dl_type = 0x800
+            msg.match.dl_type = 0x800   # IPv4 packet Type
             msg.match.nw_dst = IPAddr(topo_ft.host_to_ip(host))
             msg.actions.append(of.ofp_action_output(port=port))
             connection.send(msg)
