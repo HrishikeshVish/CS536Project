@@ -59,7 +59,8 @@ def main():
     link = custom(TCLink, bw=args.bw, delay='.05ms',
                   max_queue_size=200)
 
-    net = Mininet(topo=topo, host=host, link=link, controller=RemoteController, autoSetMacs=True)
+    net = Mininet(topo=topo, controller=RemoteController)
+    #net = Mininet(topo=topo, host=host, link=link, controller=RemoteController, autoSetMacs=True)
 
     net.start()
 
@@ -137,7 +138,7 @@ def main():
 
     #Here just use p.terminate() to stop the process when you are done
     net.stop()
-    proc.terminate()
+    # proc.terminate()
 
 if __name__ == '__main__':
     main()
