@@ -78,7 +78,7 @@ os.system("sysctl -w net.ipv4.tcp_pacing_ca_ratio=75")
 ## Reproducing TCP outcast on Fat Tree Topology
 For this part we use the Fattree TOPO and POX controller defined in [here](https://github.com/gramorgan/mininet-fat-tree) for this part.
 
-Test setup - [Mininet 2.2.2 VM with pox installed](https://github.com/mininet/mininet/releases/tag/2.2.2)
+Test setup - [Mininet 2.2.2 VM, ubuntu 14.04 with POX](https://github.com/mininet/mininet/releases/tag/2.2.2) - 1 CPU, 2 GB RAM
 ### The steps to run this experiment are:
 ```
 # clone the repo
