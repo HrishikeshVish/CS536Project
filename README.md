@@ -12,7 +12,6 @@ sudo apt upgrade
 sudo apt update
 sudo apt-get install mininet
 sudo apt-get install python3-pip python-dev
-sudo pip3 install termcolor
 sudo apt-get install -y bwm-ng
 
 # clone this repo
