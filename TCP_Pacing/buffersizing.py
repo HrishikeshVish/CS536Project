@@ -143,7 +143,7 @@ parser.add_argument('--mod',
 args = parser.parse_args()
 
 CUSTOM_IPERF_PATH = args.iperf
-assert(os.path.exists(CUSTOM_IPERF_PATH))
+#assert(os.path.exists(CUSTOM_IPERF_PATH))
 
 if not os.path.exists(args.dir):
     os.makedirs(args.dir)
@@ -174,6 +174,7 @@ class StarTopo(Topo):
         
         # the switch connecting them
         switch = self.addSwitch('s0')
+
         
         # switch-server link
         maxq = int((2 * args.delay * self.bw_net) / 0.012)
@@ -181,7 +182,7 @@ class StarTopo(Topo):
 	           bw=self.bw_net, delay=0, loss=0, max_queue_size=maxq)
         
         # the hosts, linked to the switch
-        for h in xrange(self.n - 1):
+        for h in range(self.n - 1):
             host = self.addHost('h%d' % h)
             self.addLink(host, switch,
                 bw=self.bw_host, delay=self.delay, loss=0, max_queue_size=10000)
@@ -277,7 +278,7 @@ def median(l):
     "Compute median from an unsorted list of values"
     s = sorted(l)
     if len(s) % 2 == 1:
-        return s[(len(l) + 1) / 2 - 1]
+        return s[((len(l) + 1) / 2) - 1]
     else:
         lower = s[len(l) / 2 - 1]
         upper = s[len(l) / 2]
@@ -504,8 +505,13 @@ def main():
     topo = StarTopo(n=args.n, bw_host=args.bw_host,
                     delay='%sms' % args.delay,
                     bw_net=args.bw_net, maxq=args.maxq)
-    net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink)
+    net = Mininet(topo=topo, link=TCLink)
+
     net.start()
+    os.system('ifconfig')
+    os.system('tc qdisc show dev s0-eth1')
+    os.system('sudo tc qdisc add dev s0-eth1 parent 5:1 handle 2: sfq perturb 10')
+    exit()
     dumpNodeConnections(net.hosts)
     net.pingAll()
     
@@ -513,7 +519,7 @@ def main():
         do_it_fast()
 
     # fill the hosts list
-    for h in xrange(args.n - 1):
+    for h in range(args.n - 1):
         hosts.append(net.getNodeByName('h%d' % h))
     
     # verify letency and bandwidth of mininet topology

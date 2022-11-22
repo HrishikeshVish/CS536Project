@@ -98,8 +98,10 @@ class OutcastTopo(Topo):
         h0 = self.addHost('h0', **hconfig)
         s1 = self.addSwitch('s1')
         aggrSwitch = self.addSwitch('s2')
+
         for i in range(1, n+1):
             h = self.addHost('h'+str(i), **hconfig)
+            #maxq = int((2 * args.delay * self.bw_net) / 0.012)
             self.addLink(h, aggrSwitch, port1=0, port2=i+1, **lconfig)    
 	
         self.addLink(h0, s1, port1=0, port2=h0Switch, **lconfig)
@@ -332,7 +334,10 @@ def main():
     net = Mininet(topo=topo, link=link)
 
     net.start()
-
+    os.system('ifconfig')
+    os.system('tc qdisc show dev s1-eth1')
+    os.system('sudo tc qdisc replace dev s1-eth1 parent 5:1 handle 2: sfq perturb 10')
+    os.system('ifconfig')
     # cprint("*** Dumping network connections:", "green")
     print("*** Dumping network connections:")
     dumpNetConnections(net)
@@ -356,8 +361,10 @@ def main():
     # cprint("Experiment took %.3f seconds" % (end - start), "yellow")
     print("Experiment took %.3f seconds" % (end - start))
     print("*** Testing Buffering")
+    """
     for flows in [3,7,13]:
         ret = do_sweep(iface='s1-eth1', nflows=flows)
+    """
 if __name__ == '__main__':
     check_prereqs()
     main()

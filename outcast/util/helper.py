@@ -6,6 +6,7 @@ import re
 import itertools
 import matplotlib as m
 import os
+
 if os.uname()[0] == "Darwin":
     m.use("MacOSX")
 else:

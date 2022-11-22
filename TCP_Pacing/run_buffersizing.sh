@@ -32,7 +32,7 @@ for flows_per_host in 0 1 2 5 10 50 100 200 300 400; do
 #for flows_per_host in 0 1 2 5; do
 	dir=$rootdir/nf$flows_per_host-r$run-regular
 
-	python buffersizing.py --bw-host 1000 \
+	python3 buffersizing.py --bw-host 1000 \
 		--bw-net 62.5 \
 		--delay 43.5 \
 		--dir $dir \
@@ -42,7 +42,7 @@ for flows_per_host in 0 1 2 5 10 50 100 200 300 400; do
 
 	dir=$rootdir/nf$flows_per_host-r$run-paced
 
-	python buffersizing.py --mod --bw-host 1000 \
+	python3 buffersizing.py --mod --bw-host 1000 \
                 --bw-net 62.5 \
                 --delay 43.5 \
                 --dir $dir \
