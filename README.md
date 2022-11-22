@@ -4,7 +4,7 @@ Paper Followed: [paper link](https://www.usenix.org/conference/nsdi12/technical-
 First part is to reproduce the TCP outcast problem on a parking lot topology with n(2/6/12) senders on 3 hop distance and 1 sender (getting outcasted)
 on 2 hop distance from the receiver. 
 
-Test setup - AWS EC2 instance (t2.large running ubuntu 22.04 in us-east-1d AZ)
+Test setup - AWS EC2 instance (t2.large running ubuntu 22.04 in us-east-1d AZ, Python 3.7.13)
 ### The steps to run this experiment are:
 ```
 # env setup steps
