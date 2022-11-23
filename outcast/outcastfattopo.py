@@ -146,6 +146,7 @@ def main():
     os.system("killall -9 bwm-ng")
     # cprint("Experiment took %.3f seconds" % (end - start), "yellow")
     print("Experiment took %.3f seconds" % (end - start))
+    # proc.terminate()
 
 if __name__ == '__main__':
     main()

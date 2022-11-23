@@ -138,7 +138,7 @@ for f in args.files:
     rate = defaultdict(list)
 
     # Changed from 2, 3 to 5, 6
-    column = 5 if args.rx else 6
+    column = 2 if args.rx else 3
     for row in data:
         row = list(row)
         try:
@@ -155,20 +155,22 @@ for f in args.files:
                 rate[ifname].append(float(row[column]) * 8.0 / (1 << 20))
             except:
                 break
+
+            time_offset = float(row[0]) - float(start_time)
             # store the b/w for avg throughput calculation
-            if ifname.strip() == 's1-eth1':
-                time_offset = float(row[0]) - float(start_time)
+            if ifname.strip() == 's1-eth1' and int(time_offset//10) < 7:
                 avg_bw[0][int(time_offset//10)].append(float(row[column]) * 8.0 / (1 << 20))
             else:
-                time_offset = float(row[0]) - float(start_time)
-                avg_bw[1][int(time_offset//10)].append(float(row[column]) * 8.0 / (1 << 20))
+                if int(time_offset//10) < 7:
+                    time_offset = float(row[0]) - float(start_time)
+               	    avg_bw[1][int(time_offset//10)].append(float(row[column]) * 8.0 / (1 << 20))
 
     metric = avg
     if args.metric == 'max':
-        metric = lambda l: max(l) / 2
+        metric = lambda l: max(l) / 2 if l else 0.0
 
     offset_diff = int(metric([metric(row) for key, row in rate.items() if pat_iface.match(key)]) * 1.5) + 1
-        
+    print(rate.keys())
     if args.summarise:
         for k in rate.keys():
             if pat_iface.match(k):
@@ -176,7 +178,6 @@ for f in args.files:
                 vals = filter(lambda e: e < 1500, rate[k][10:-10])
                 if args.normalise:
                     vals = list(map(lambda e: e / bw[idx], vals))
-                    
                     idx += 1
                 to_plot.append(vals)
     else:

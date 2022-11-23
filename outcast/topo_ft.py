@@ -4,6 +4,8 @@ from mininet.topo import Topo
 import re
 
 # utility functions to assign/get DPIDs, ip addresses, mac addresses etc.
+# DPID (datapath ID) - uniquely identifies an OpenFlow switch (OpenFlow instance).
+# Do not set the same datapath ID for different OpenFlow switches.
 
 def location_to_dpid(core=None, pod=None, switch=None):
     if core is not None:

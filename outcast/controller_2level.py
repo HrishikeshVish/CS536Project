@@ -1,5 +1,4 @@
 # pox controller implementing dijkstra shortest-path routing
-# morgan grant (mlgrant@ucsc.edu)
 
 import topo_ft
 
