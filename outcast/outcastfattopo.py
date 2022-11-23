@@ -55,11 +55,12 @@ def main():
     k = 4
     topo = FatTreeTopo(k=k)
 
-    host = custom(CPULimitedHost, cpu=.5)  # 15% of system bandwidth
+    host = custom(CPULimitedHost, cpu=.1)  # 15% of system bandwidth
     link = custom(TCLink, bw=args.bw, delay='.05ms',
                   max_queue_size=200)
 
-    net = Mininet(topo=topo, host=host, link=link, controller=RemoteController, autoSetMacs=True)
+    net = Mininet(topo=topo, controller=RemoteController)
+    #net = Mininet(topo=topo, host=host, link=link, controller=RemoteController, autoSetMacs=True)
 
     net.start()
 
@@ -81,6 +82,7 @@ def main():
     # 
     # Actual Experiment
     #
+    start = time()
 
     seconds = args.time
 
@@ -106,7 +108,7 @@ def main():
     # Hint: Use sendCmd() and waitOutput() to start iperf and wait for them to finish
     # iperf command to start flow: 'iperf -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, node_name)
     # Hint (not important): You may use progress(t) to track your experiment progress
-    
+    sender1.sendCmd('iperf -Z reno -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, 'p0_s0_h3'))    
     for p in range(k):  # Pod Range
         for e in range(2):  # Edge range
             for h in range(2, (k/2)+2):  # Host Range
@@ -114,8 +116,10 @@ def main():
                     continue
                 node_name = 'p%d_s%d_h%d' % (p, e, h)
                 sender = net.getNodeByName(node_name)
+                print('Sending iperf to %s' % (node_name))
                 sender.sendCmd('iperf -Z reno -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, node_name))
    
+    sender1.waitOutput()
     for p in range(k):  # Pod Range
         for e in range(2):  # Edge range
             for h in range(2, (k/2)+2):  # Host Range
@@ -123,6 +127,7 @@ def main():
                     continue
                 node_name = 'p%d_s%d_h%d' % (p, e, h)
                 sender = net.getNodeByName(node_name)
+                print('Waiting iperf for %s' % (node_name))
                 sender.waitOutput()
 
     recvr.cmd('kill %iperf')
@@ -137,7 +142,10 @@ def main():
 
     #Here just use p.terminate() to stop the process when you are done
     net.stop()
-    proc.terminate()
+    end = time()
+    os.system("killall -9 bwm-ng")
+    # cprint("Experiment took %.3f seconds" % (end - start), "yellow")
+    print("Experiment took %.3f seconds" % (end - start))
 
 if __name__ == '__main__':
     main()

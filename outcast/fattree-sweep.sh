@@ -17,7 +17,7 @@ trap ctrlc SIGINT
 start=`date`
 exptid=`date +%b%d-%H:%M`
 rootdir=outcast-$exptid
-bw=100
+bw=1000
 
 # Note: you need to make sure you report the results
 # for the correct port!
