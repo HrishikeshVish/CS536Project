@@ -166,11 +166,11 @@ def run_outcast_expt(net, n):
 
     waitListening(sender1, recvr, port)
 
-    # TODO: start the sender iperf processes and wait for the flows to finish
-    # Hint: Use getNodeByName() to get a handle on each sender.
-    # Hint: Use sendCmd() and waitOutput() to start iperf and wait for them to finish
+    
+    # Use getNodeByName() to get a handle on each sender.
+    # Use sendCmd() and waitOutput() to start iperf and wait for them to finish
     # iperf command to start flow: 'iperf -c %s -p %s -t %d -i 1 -yc > %s/iperf_%s.txt' % (recvr.IP(), 5001, seconds, args.dir, node_name)
-    # Hint (not important): You may use progress(t) to track your experiment progress
+   
     
     for i in range(0, n+1):
         node_name = 'h' + str(i)
